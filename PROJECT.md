@@ -6,7 +6,7 @@
 ## 项目
 
 一名 AI 产品经理的软件开发学习仓库，产出可运行产品 + 公开笔记。
-当前阶段：**阶段 0（工具与工作流）**。
+当前阶段：**阶段 3（前端 JavaScript）**。
 
 ## 技术栈
 
@@ -15,6 +15,7 @@
 | 前端     | HTML/CSS → JavaScript → React + Tailwind | 浏览器只跑 JS，Python 不可替代前端 |
 | 后端     | **Python 3.13 + FastAPI** | 类型提示即校验                |
 | 包管理    | **uv**                    | 已取代 pip，禁止手写 venv      |
+| 运行时     | **Node.js**（可选）         | 跑前端构建工具；纯静态页不一定需要 |
 | 数据库    | PostgreSQL（Supabase/Neon）+ SQLModel | 阶段 6 引入        |
 | 部署     | 前端 Vercel；后端 Render/Railway | 阶段 9 引入              |
 | 移动端    | 微信小程序（调 HTTP 接口）          | 阶段 10 引入               |
@@ -22,9 +23,11 @@
 ## 目录约定
 
 ```
-docs/               静态站点源码（GitHub Pages 发布目录），每次 push 后自动更新
-projects/           各阶段的可运行项目源码（如 projects/subscription-cli）
-README.md           对外说明：在做什么、路线、进度
+docs/                       静态站点源码（GitHub Pages 发布目录），push 后自动更新
+projects/                   各阶段的可运行项目源码
+├── subscription-cli/       阶段 2：Python CLI 版订阅管家（uv 管理）
+└── subscription-web/       阶段 3：网页版订阅管家（纯静态 HTML/CSS/JS）
+README.md                   对外说明：在做什么、路线、进度
 PROJECT.md          本文件：给 AI 的项目上下文
 学习路线-总览.md        阶段地图与 AI 协作原则
 courses/阶段N-名称/    每课课件 md
@@ -36,9 +39,10 @@ scratch/            临时练习，不入 git
 ## 命令约定
 
 ```bash
-uv init <项目名>     # 建项目；外层已有仓库时加 --no-git
-uv run <命令>        # 跑代码（自动管虚拟环境）
-uv add/remove <包名> # 增删依赖
+uv init <项目名> --app --vcs none   # 建项目；外层已有仓库时加 --vcs none（旧参数 --no-git 已废弃）
+uv run <命令>                        # 跑代码（自动管虚拟环境）
+uv add/remove <包名>                 # 增删依赖
+node <脚本>.js                       # 跑 JS：也可套一层假 DOM，测试浏览器里的纯计算逻辑
 git add -A && git commit -m "类型: 说明"   # 每完成一个可运行功能就提交
 ```
 
