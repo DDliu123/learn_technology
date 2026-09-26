@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!-- 作业 01：Emmet 手打练习 + article 感想 + 图片。已按讲评修正 -->
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>前端基础练习 · 学习笔记</title>
+    <meta name="description" content="第 1 课作业：手写 head 三件套、article 区块、图片 alt。" />
+
+    <!-- 复用主页样式：同一份 CSS 可以给任意多个页面用，这正是外部样式表的价值 -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <h1>完整编程项目 · 前端基础</h1>
+        <p>手打 head 三件套，从零再生成。</p>
+
+        <nav class="site-nav">
+          <ul>
+            <li><a href="index.html">返回主页</a></li>
+            <li><a href="#notes">笔记</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 修正点 1：正文必须放进 main，每页一个 -->
+    <main class="container">
+      <article id="notes" class="section">
+        <h2>学习感想 · 笔记</h2>
+        <p>
+          一开始我总是依赖代码补全和笔记，但今天强迫自己手打
+          <code>&lt;!DOCTYPE html&gt;</code>、<code>&lt;html&gt;</code>、<code>&lt;head&gt;</code>、<code>&lt;meta&gt;</code>
+          这些标签，才发现记忆并不牢固。
+        </p>
+        <p>
+          Emmet 的 <code>!</code> 缩写虽然能一键生成骨架，但只有亲手敲一遍，才会真正理解
+          <code>charset</code> 和 <code>viewport</code> 为什么必须存在。
+        </p>
+        <p>
+          接下来我要坚持每天手写一个最小页面，直到完全不看笔记也能写出完整的 head 三件套。
+        </p>
+
+        <!-- 修正点 2：alt 描述图片内容，不写"这是 alt 用法"这类说明文字 -->
+        <figure>
+          <img
+            src="https://picsum.photos/600/300?random=1"
+            alt="随机的风景占位图"
+            width="600"
+            height="300"
+          />
+          <figcaption>底部图片 · 来自 picsum.photos（随机占位图）</figcaption>
+        </figure>
+      </article>
+    </main>
+
+    <!-- 修正点 3：不再用 hr 做视觉分隔，交给 CSS 的 border -->
+    <footer class="site-footer">
+      <div class="container">
+        <p>练习完成：Emmet <code>!</code> 生成页面 · 手打 head 三件套 · article 感想 · 底部 img + alt</p>
+      </div>
+    </footer>
+  </body>
+</html>
