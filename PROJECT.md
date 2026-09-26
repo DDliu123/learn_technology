@@ -22,12 +22,15 @@
 ## 目录约定
 
 ```
+docs/               静态站点源码（GitHub Pages 发布目录），每次 push 后自动更新
 README.md           对外说明：在做什么、路线、进度
 PROJECT.md          本文件：给 AI 的项目上下文
 学习路线-总览.md        阶段地图与 AI 协作原则
-courses/阶段N-名称/    课件 md + 该阶段练习代码
+courses/阶段N-名称/    每课课件 md
 scratch/            临时练习，不入 git
 ```
+
+站点地址：<https://ddliu123.github.io/learn_technology/>
 
 ## 命令约定
 
