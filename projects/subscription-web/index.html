@@ -4,19 +4,52 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>订阅账单管家 · 网页版</title>
-    <meta name="description" content="网页版订阅账单管家：统计月度与年度订阅支出。" />
+    <meta name="description" content="网页版订阅账单管家：添加订阅、统计月度与年度支出，数据存在浏览器本地。" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header class="site-header">
       <h1>订阅账单管家</h1>
-      <p>同一个产品，从命令行搬到浏览器</p>
+      <p>同一个产品，从命令行搬到浏览器 —— 数据存在你自己的浏览器里</p>
     </header>
 
     <main class="container">
       <!-- 概览区：内容由 JS 渲染，HTML 里只留空容器 -->
       <section class="stats" id="stats" aria-label="支出概览"></section>
 
+      <!-- ===== 表单区 ===== -->
+      <section class="card">
+        <h2>添加订阅</h2>
+        <form id="bill-form" class="bill-form" autocomplete="off">
+          <label>
+            名称
+            <input name="name" required placeholder="ChatGPT Plus" />
+          </label>
+          <label>
+            月费（元）
+            <input name="price" type="number" min="0" step="0.01" required placeholder="145" />
+          </label>
+          <label>
+            分类
+            <input name="category" list="category-list" placeholder="AI 工具" />
+            <datalist id="category-list">
+              <option value="视频"></option>
+              <option value="音乐"></option>
+              <option value="AI 工具"></option>
+              <option value="效率工具"></option>
+              <option value="存储"></option>
+            </datalist>
+          </label>
+          <label>
+            下次扣费
+            <input name="nextBilling" type="date" required />
+          </label>
+          <button type="submit">添加</button>
+        </form>
+        <p class="tip" id="tip" hidden></p>
+      </section>
+
+      <!-- ===== 列表区 ===== -->
       <section class="card">
         <div class="card-head">
           <h2>我的订阅</h2>
@@ -33,17 +66,24 @@
               <th class="num">月费</th>
               <th>分类</th>
               <th>下次扣费</th>
+              <th>操作</th>
             </tr>
           </thead>
+          <!-- 事件委托挂在这里：行是动态生成的，容器是写死的 -->
           <tbody id="bill-body"></tbody>
         </table>
 
-        <p class="empty" id="empty-tip" hidden>还没有订阅记录。</p>
+        <p class="empty" id="empty-tip" hidden>还没有订阅记录，先在上面添加一条。</p>
+
+        <div class="toolbar">
+          <button type="button" id="export">导出 JSON</button>
+          <button type="button" id="reset">恢复示例数据</button>
+        </div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <p>阶段 3 · 前端 JavaScript &nbsp;·&nbsp; <a href="https://github.com/DDliu123/learn_technology">源码仓库</a></p>
+      <p>阶段 3 · 前端 JavaScript &nbsp;·&nbsp; 数据保存在本浏览器的 localStorage，不上传服务器</p>
     </footer>
 
     <!-- defer：等 HTML 解析完再执行脚本，这样 JS 里一定能查到 DOM 元素 -->

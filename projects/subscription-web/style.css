@@ -161,7 +161,76 @@ button:hover {
   text-align: center;
 }
 
-/* ===== 8. 页脚 ===== */
+/* ===== 8. 表单：Grid 四列，窄屏自动降列 ===== */
+.bill-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.bill-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.bill-form input {
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.bill-form input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -1px;
+  border-color: var(--color-accent);
+}
+
+/* ===== 9. 提示条与底部工具条 ===== */
+.tip {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: var(--color-danger);
+  background: #ffebe9;
+  border: 1px solid #ffcecb;
+  border-radius: 6px;
+}
+
+.tip.ok {
+  color: #1a7f37;
+  background: #dafbe1;
+  border-color: #aceebb;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.link-danger {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  color: var(--color-danger);
+  border-color: transparent;
+  background: transparent;
+}
+
+.link-danger:hover {
+  color: #ffffff;
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+/* ===== 10. 页脚 ===== */
 .site-footer {
   margin-top: 48px;
   padding: 24px 0;
@@ -171,7 +240,7 @@ button:hover {
   font-size: 0.9rem;
 }
 
-/* ===== 9. 响应式 ===== */
+/* ===== 11. 响应式 ===== */
 @media (max-width: 640px) {
   .card {
     padding: 16px;
