@@ -35,6 +35,31 @@ def load_subscriptions() -> list[Subscription]:
     return [Subscription(**item) for item in raw]
 
 
+# ------------------------------------------------------------------
+# 增删改：所有修改都要「先读 → 改内存 → 整体写回」
+# 千万不要在别的模块里各自 save，会互相覆盖
+# ------------------------------------------------------------------
+
+
+def add_subscription(sub: Subscription) -> list[Subscription]:
+    """新增一条订阅，返回更新后的完整列表。"""
+    subs = load_subscriptions()
+    subs.append(sub)
+    save_subscriptions(subs)
+    return subs
+
+
+def remove_subscription(name: str) -> tuple[list[Subscription], bool]:
+    """按名称删除，返回 (更新后的列表, 是否删除成功)。"""
+    subs = load_subscriptions()
+    remaining = [s for s in subs if s.name != name]
+    removed = len(remaining) != len(subs)
+
+    if removed:
+        save_subscriptions(remaining)
+    return remaining, removed
+
+
 def save_subscriptions(subs: list[Subscription]) -> None:
     """保存订阅数据。"""
     DATA_DIR.mkdir(parents=True, exist_ok=True)   # 目录不存在就建，已存在不报错

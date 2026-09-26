@@ -7,7 +7,9 @@ authors = [
     { name = "ziyun", email = "3561900938@qq.com" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "rich>=15.0.0",
+]
 
 [project.scripts]
 subscription-cli = "subscription_cli:main"
