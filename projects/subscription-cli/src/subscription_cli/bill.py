@@ -1,25 +1,22 @@
-"""订阅账单计算 —— 第 1 课：类型、列表、字典、函数。
+"""订阅账单计算 —— 第 2 课：改用 dataclass，属性访问取代字典取值。
 
-知识点对照：
-- 类型注解   ：def f(x: int) -> float，写给自己和 AI 看的文档
-- 列表推导   ：[表达式 for 元素 in 列表 if 条件]
-- f-string   ：f"{变量:,.2f}" 控制小数位与千分位
+知识点：
+- 类型注解写具体类型：list[Subscription] 比 list[dict] 信息量大
+- 编辑器能据此自动补全 s.price，写错属性立刻标红
 """
 
-# 类型别名：让 Money 比 float 更有业务含义
-Money = float
+from subscription_cli.models import Subscription
 
-# 订阅数据用字典表示：键值对，取值用 sub["name"]
-Subscription = dict[str, str | Money]
+Money = float
 
 
 def monthly_cost(subs: list[Subscription]) -> Money:
     """月支出：所有订阅月费求和。"""
-    return sum(sub["price"] for sub in subs)  # type: ignore
+    return sum(s.price for s in subs)
 
 
 def annual_cost(subs: list[Subscription]) -> Money:
-    """年支出：复用月支出函数，避免重复逻辑。"""
+    """年支出：复用月支出，避免重复逻辑。"""
     return monthly_cost(subs) * 12
 
 
@@ -29,46 +26,42 @@ def format_money(amount: Money) -> str:
 
 
 def most_expensive(subs: list[Subscription]) -> Subscription:
-    """最贵的一项：max + key 参数是 Python 的惯用写法。"""
-    return max(subs, key=lambda sub: sub["price"])  # type: ignore
+    """最贵的一项。"""
+    return max(subs, key=lambda s: s.price)
 
 
 def group_by_category(subs: list[Subscription]) -> dict[str, list[Subscription]]:
-    """按类别分组：字典的好处是查一类数据不用遍历整个列表。"""
+    """按类别分组。"""
     groups: dict[str, list[Subscription]] = {}
-    for sub in subs:
-        category = sub["category"]  # type: ignore
-        groups.setdefault(category, []).append(sub)
+    for s in subs:
+        groups.setdefault(s.category, []).append(s)
     return groups
+
+
+def sort_by_next_billing(subs: list[Subscription]) -> list[Subscription]:
+    """按下次扣费日排序：YYYY-MM-DD 格式的字符串可以直接比大小。"""
+    return sorted(subs, key=lambda s: s.next_billing)
 
 
 def print_summary(subs: list[Subscription]) -> None:
     """打印账单摘要。"""
-    print("=" * 40)
-    print(f"订阅数量：{len(subs)} 项")
+    print("=" * 54)
+    print(f"订阅数量：{len(subs)} 项\n")
 
-    for sub in subs:
-        print(f"  {sub['name']:<16} {format_money(sub['price']):>10}  [{sub['category']}]")
+    print(f"{'名称':<16}{'月费':>10}  {'分类':<10}{'下次扣费':>12}")
+    print("-" * 54)
+    for s in sort_by_next_billing(subs):
+        print(f"{s.name:<16}{format_money(s.price):>10}  {s.category:<10}{s.next_billing:>12}")
 
-    print("-" * 40)
+    print("-" * 54)
     print(f"月度支出：{format_money(monthly_cost(subs))}")
     print(f"年度支出：{format_money(annual_cost(subs))}")
 
     top = most_expensive(subs)
-    print(f"最贵的一项：{top['name']}（{format_money(top['price'])}）")
+    print(f"最贵的一项：{top.name}（{format_money(top.price)}）")
 
-    print("-" * 40)
+    print("-" * 54)
     print("分类统计：")
     for category, items in group_by_category(subs).items():
         print(f"  {category}: {format_money(monthly_cost(items))}（{len(items)} 项）")
-    print("=" * 40)
-
-
-# 模块级演示数据：先用假数据跑通计算，第 2 课再换成从文件读取
-DEMO_SUBSCRIPTIONS: list[Subscription] = [
-    {"name": "Netflix", "price": 68.0, "category": "视频"},
-    {"name": "Spotify", "price": 58.0, "category": "音乐"},
-    {"name": "ChatGPT Plus", "price": 145.0, "category": "AI 工具"},
-    {"name": "Notion", "price": 45.0, "category": "效率工具"},
-    {"name": "iCloud", "price": 21.0, "category": "存储"},
-]
+    print("=" * 54)

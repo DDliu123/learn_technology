@@ -1,0 +1,9 @@
+# 个人账单数据：含真实消费信息，不入库
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
