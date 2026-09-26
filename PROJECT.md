@@ -23,6 +23,7 @@
 
 ```
 docs/               静态站点源码（GitHub Pages 发布目录），每次 push 后自动更新
+projects/           各阶段的可运行项目源码（如 projects/subscription-cli）
 README.md           对外说明：在做什么、路线、进度
 PROJECT.md          本文件：给 AI 的项目上下文
 学习路线-总览.md        阶段地图与 AI 协作原则
