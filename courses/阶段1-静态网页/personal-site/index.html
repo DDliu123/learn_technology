@@ -7,26 +7,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>紫云 · 从 0 到 1 学做产品</title>
     <meta name="description" content="一名 AI 产品经理的软件开发学习记录：路线、项目与笔记。" />
+
+    <!-- 外部样式表：样式与结构分离，改外观不用动 HTML -->
+    <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
     <!-- 页头：站点标题 + 导航 -->
-    <header>
-      <h1>从 0 到 1 学做产品</h1>
-      <p>一名 AI 产品经理的软件开发学习记录 · 全程 AI 辅助编程</p>
+    <header class="site-header">
+      <div class="container">
+        <h1>从 0 到 1 学做产品</h1>
+        <p>一名 AI 产品经理的软件开发学习记录 · 全程 AI 辅助编程</p>
 
-      <nav>
-        <ul>
-          <li><a href="#about">关于我</a></li>
-          <li><a href="#roadmap">学习路线</a></li>
-          <li><a href="#notes">笔记</a></li>
-        </ul>
-      </nav>
+        <nav class="site-nav">
+          <ul>
+            <li><a href="#about">关于我</a></li>
+            <li><a href="#roadmap">学习路线</a></li>
+            <li><a href="#notes">笔记</a></li>
+          </ul>
+        </nav>
+      </div>
     </header>
 
     <!-- 主体：一个页面只能有一个 main -->
-    <main>
-      <section id="about">
+    <main class="container">
+      <section id="about" class="section">
         <h2>关于我</h2>
         <p>
           我是紫云，杭州未斯科技的 AI 产品经理。日常工作是把 AI 能力落进真实业务系统，
@@ -37,7 +42,7 @@
         </p>
       </section>
 
-      <section id="roadmap">
+      <section id="roadmap" class="section">
         <h2>学习路线</h2>
         <p>主线：React + Python FastAPI + PostgreSQL，约 26 周。</p>
 
@@ -85,7 +90,7 @@
         </table>
       </section>
 
-      <section id="notes">
+      <section id="notes" class="section">
         <h2>笔记</h2>
         <ul>
           <li><a href="#">阶段 0：命令行、Git、uv —— 第一天踩的三个坑</a></li>
@@ -95,8 +100,10 @@
     </main>
 
     <!-- 页脚 -->
-    <footer>
-      <p>2026 紫云 · <a href="https://github.com/">GitHub</a></p>
+    <footer class="site-footer">
+      <div class="container">
+        <p>2026 紫云 · <a href="https://github.com/">GitHub</a></p>
+      </div>
     </footer>
   </body>
 </html>

@@ -56,6 +56,8 @@
 | `git restore 文件`            | 丢弃未提交的改动       |
 | `git restore --staged 文件`   | 取消 add         |
 
+
+
 ---
 
 ## 4. 撤销的三档（重要）

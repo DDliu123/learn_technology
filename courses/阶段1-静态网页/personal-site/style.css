@@ -1,0 +1,129 @@
+/* ===== 1. 变量：统一定义配色与尺寸，改一处全站生效 ===== */
+:root {
+  --color-text: #1f2328;
+  --color-muted: #656d76;
+  --color-bg: #ffffff;
+  --color-surface: #f6f8fa;
+  --color-border: #d0d7de;
+  --color-accent: #0969da;
+  --radius: 8px;
+  --space: 16px;
+  --max-width: 760px;
+}
+
+/* ===== 2. 全局重置：盒模型用 border-box，宽高包含 padding 和 border ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, "Microsoft YaHei", sans-serif;
+  line-height: 1.7;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+/* ===== 3. 容器：居中 + 限宽，用 margin: auto 实现 ===== */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ===== 4. 页头：Flex 竖排居中 ===== */
+.site-header {
+  padding: 48px 0 24px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.site-header p {
+  margin: 8px 0 0;
+  color: var(--color-muted);
+}
+
+/* ===== 5. 导航：Flex 横排 + 均分间距 ===== */
+.site-nav ul {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  list-style: none;   /* 去掉圆点 */
+  margin: 24px 0 0;
+  padding: 0;
+}
+
+.site-nav a {
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.site-nav a:hover {
+  color: var(--color-accent);
+}
+
+/* ===== 6. 区块：卡片样式 ===== */
+.section {
+  margin: 32px 0;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.section h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+/* ===== 7. 表格：边框合并 + 斑马纹 ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;   /* 关键：去掉双边框间隙 */
+  font-size: 0.95rem;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+th {
+  background: #eaeef2;
+  font-weight: 600;
+}
+
+tbody tr:hover {
+  background: #ffffff;
+}
+
+/* ===== 8. 列表与链接 ===== */
+ul li {
+  margin: 6px 0;
+}
+
+a {
+  color: var(--color-accent);
+}
+
+/* ===== 9. 页脚 ===== */
+.site-footer {
+  margin-top: 48px;
+  padding: 24px 0;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
