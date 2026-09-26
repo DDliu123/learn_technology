@@ -6,7 +6,7 @@
 ## 项目
 
 一名 AI 产品经理的软件开发学习仓库，产出可运行产品 + 公开笔记。
-当前阶段：**阶段 3（前端 JavaScript）**。
+当前阶段：**阶段 3 已完成**（网页版订阅管家已上线）。
 
 ## 技术栈
 
@@ -23,10 +23,11 @@
 ## 目录约定
 
 ```
-docs/                       静态站点源码（GitHub Pages 发布目录），push 后自动更新
-projects/                   各阶段的可运行项目源码
-├── subscription-cli/       阶段 2：Python CLI 版订阅管家（uv 管理）
-└── subscription-web/       阶段 3：网页版订阅管家（纯静态 HTML/CSS/JS）
+docs/                       GitHub Pages 发布目录，每次 push 后自动更新
+├── index.html              教程站首页（含 Demo 区块）
+└── subscription/           阶段 3：网页版订阅管家（既是源码也是线上页面）
+projects/                   不需要发布页面的项目源码
+└── subscription-cli/       阶段 2：Python CLI 版订阅管家（uv 管理）
 README.md                   对外说明：在做什么、路线、进度
 PROJECT.md          本文件：给 AI 的项目上下文
 学习路线-总览.md        阶段地图与 AI 协作原则
@@ -35,6 +36,10 @@ scratch/            临时练习，不入 git
 ```
 
 站点地址：<https://ddliu123.github.io/learn_technology/>
+Demo —— 网页版订阅管家：<https://ddliu123.github.io/learn_technology/subscription/>
+
+新网页要上线：Pages 一个仓库只给一个站点，来源只能是根目录或 /docs，所以新页面一律放 `docs/<子目录>/`，
+禁止「源码一份 + docs 里再复制一份」——两边迟早不同步。
 
 ## 命令约定
 
