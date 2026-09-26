@@ -1,0 +1,7 @@
+[
+  { "name": "Netflix", "price": 68, "category": "视频", "nextBilling": "2026-10-01" },
+  { "name": "Spotify", "price": 58, "category": "音乐", "nextBilling": "2026-10-05" },
+  { "name": "ChatGPT Plus", "price": 145, "category": "AI 工具", "nextBilling": "2026-10-08" },
+  { "name": "Notion", "price": 45, "category": "效率工具", "nextBilling": "2026-10-12" },
+  { "name": "iCloud", "price": 21, "category": "存储", "nextBilling": "2026-10-20" }
+]

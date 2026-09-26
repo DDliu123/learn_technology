@@ -33,6 +33,23 @@ function saveSubscriptions(subs) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(subs));
 }
 
+/**
+ * 网络/文件加载 —— 第 3 课：异步 fetch
+ * async 函数里可以用 await，返回值会被自动包成 Promise
+ * 两个 await 各等一件事：
+ *   ① await fetch(url)        等响应【头】到了（状态码、响应头）
+ *   ② await response.json()   等响应【体】下载并解析完 —— 忘了这个 await，拿到的是 Promise 不是数据
+ */
+async function fetchSubscriptions(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    // fetch 的坑：HTTP 404/500 都【不会】抛异常，只有网络断了才会。
+    // 所以必须手动检查 response.ok，否则会拿着一个错误页面去 JSON.parse
+    throw new Error(`HTTP ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
 /* ==========================================================
    2. 数据变更 —— 全部返回【新数组】，不改原数据
    ========================================================== */
@@ -167,6 +184,12 @@ function renderTip(message, ok = false) {
   tip.hidden = false;
 }
 
+function setLoading(button, loading) {
+  button.disabled = loading;
+  button.textContent = loading ? "载入中…" : "载入示例数据";
+  button.classList.toggle("is-loading", loading);
+}
+
 /* ==========================================================
    5. 状态与渲染入口
    ========================================================== */
@@ -260,5 +283,26 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!confirm("这会覆盖当前所有订阅，确定恢复示例数据？")) return;
     commit(structuredClone(SEED_SUBSCRIPTIONS));
     renderTip("已恢复示例数据", true);
+  });
+
+  // --- 异步载入示例数据（fetch）---
+  document.getElementById("import").addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    setLoading(button, true);
+    try {
+      const list = await fetchSubscriptions("sample.json");
+      if (!confirm(`即将载入 ${list.length} 条订阅并覆盖当前数据，继续？`)) return;
+      // 文件里的数据不带 id，进来时补一个
+      commit(list.map((item) => ({ id: createId(), ...item })));
+      renderTip(`已载入 ${list.length} 条订阅`, true);
+    } catch (err) {
+      console.error(err);
+      renderTip(
+        "载入失败：" + err.message + "。提示：直接双击打开的 file:// 页面无法读取本地 JSON（浏览器安全限制），请用 Live Server 或在线地址访问。"
+      );
+    } finally {
+      // finally 无论成功失败都会走到 —— 最适合放「收起加载状态」这类收尾动作
+      setLoading(button, false);
+    }
   });
 });
