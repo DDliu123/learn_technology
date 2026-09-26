@@ -43,7 +43,8 @@ body {
 
 .site-header h1 {
   margin: 0;
-  font-size: 2rem;
+  /* clamp(最小, 随视口缩放, 最大)：不用媒体查询也能自动适配屏幕 */
+  font-size: clamp(1.5rem, 5vw, 2rem);
   letter-spacing: -0.02em;
 }
 
@@ -118,7 +119,59 @@ a {
   color: var(--color-accent);
 }
 
-/* ===== 9. 页脚 ===== */
+/* ===== 9. Grid 卡片区：二维布局交给 Grid ===== */
+.grid {
+  display: grid;
+  /* auto-fit + minmax：能塞几列塞几列，屏幕窄了自动变一列 —— 响应式的一行写法 */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space);
+}
+
+.card {
+  padding: 20px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+
+/* ===== 10. 响应式：窄屏下的补充规则 ===== */
+@media (max-width: 640px) {
+  .site-header {
+    padding: 32px 0 16px;
+  }
+
+  /* 导航项变多时允许换行，避免挤出屏幕 */
+  .site-nav ul {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .section {
+    padding: 16px;
+    margin: 20px 0;
+  }
+
+  /* 表格在手机上最容易溢出，字号压缩 + 允许横向滚动 */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+}
+
+/* ===== 11. 页脚 ===== */
 .site-footer {
   margin-top: 48px;
   padding: 24px 0;

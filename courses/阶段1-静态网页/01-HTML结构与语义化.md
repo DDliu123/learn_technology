@@ -105,7 +105,8 @@
 
 ## 7. 实操产物
 
-`personal-site/index.html` —— 包含 `<header>` + `<nav>` + `<main>`（3 个 section，其中路线用 `<table>`）+ `<footer>`，无 CSS。
+`docs/index.html` —— 包含 `<header>` + `<nav>` + `<main>`（含 `<table>` 路线表）+ `<footer>`。
+（站点目录后来整体迁移到仓库根目录的 `docs/`，为第 3 课部署 GitHub Pages 做准备。）
 
 自查清单：
 - `<h1>` 只有一个 ✅
