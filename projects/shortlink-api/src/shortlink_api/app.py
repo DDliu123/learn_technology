@@ -1,23 +1,35 @@
-"""阶段 5–6：FastAPI 应用入口与路由。
+"""阶段 5–7：FastAPI 应用入口与路由。
 
-路由函数职责单一：解析请求 → 调 store 层 → 拼响应 / 抛状态码。
-- 数据形状由 models.py 定义（阶段 6 起是 SQLModel 表模型）
-- 存储由 store.py 负责（阶段 6 起是 SQLite，不再是内存 dict）
-本文件只管 HTTP 层，不碰存储实现。
+分层：models.py 管数据形状，store.py 管存储，auth.py 管加密，deps.py 管鉴权，
+本文件只管 HTTP —— 接请求、调下面几层、抛状态码。
 """
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
 
+from .auth import create_access_token
 from .database import create_db_and_tables
-from .models import LinkStats, ShortLink, ShortenRequest
+from .deps import get_current_user
+from .models import (
+    LinkStats,
+    ShortLink,
+    ShortenRequest,
+    User,
+    UserCreate,
+    UserRead,
+)
 from .store import (
     CodeTakenError,
+    NotOwnerError,
+    UserExistsError,
     create_link,
+    create_user,
     delete_link,
     get_link,
     get_stats,
+    get_user_by_credentials,
     list_links,
     record_visit,
 )
@@ -25,11 +37,7 @@ from .store import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """应用生命周期钩子：启动时建表。
-
-    lifespan 是 FastAPI 推荐的启动/收尾写法（替代旧的 @app.on_event("startup")）。
-    启动时执行一次 create_db_and_tables()，确保表存在再开始接请求。
-    """
+    """启动时建表（新表会建，老表结构不会改 —— 见阶段 6 迁移）。"""
     create_db_and_tables()
     yield
 
@@ -37,9 +45,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="短链接服务", version="0.1.0", lifespan=lifespan)
 
 
+# ---------- 公开接口 ----------
+
+
 @app.get("/")
 def root():
-    """访问根路径返回一句欢迎语，证明服务在跑、能返回 JSON。"""
     return {"message": "短链接服务已启动", "docs": "/docs"}
 
 
@@ -49,28 +59,65 @@ def health():
     return {"status": "ok"}
 
 
-@app.get("/links", response_model=list[ShortLink])
-def links(search: str | None = None, sort: str = "created_at"):
-    """列出短链，支持查询参数：
+# ---------- 注册 / 登录 ----------
 
-    - `?search=xxx`：在短码和原网址里模糊匹配
-    - `?sort=code|url|created_at`：排序（默认 created_at 倒序）
 
-    函数参数不是路径参数 → FastAPI 自动把它当成 URL 查询参数（?search=...）。
+@app.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+def register(req: UserCreate):
+    """注册。密码在这里被哈希，响应里**只回 id/username/created_at**，不含密码。
+
+    用户名已存在 → 409。
     """
-    return list_links(search=search, sort=sort)
+    try:
+        return create_user(req)
+    except UserExistsError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="用户名已被注册")
+
+
+@app.post("/token")
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """登录换 token。
+
+    用 **表单**（不是 JSON）提交 username/password —— 这是 OAuth2 密码流的约定，
+    好处是 /docs 的锁图标能直接用这个接口登录。
+
+    用户名或密码错 → 401。注意：不区分「用户不存在」和「密码错」，
+    统一返回同一句提示，避免被人用错误信息探测哪些用户名存在。
+    """
+    user = get_user_by_credentials(form_data.username, form_data.password)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="用户名或密码错误",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return {
+        "access_token": create_access_token(user.username),
+        "token_type": "bearer",
+    }
+
+
+# ---------- 短链管理（需登录） ----------
+
+
+@app.get("/links", response_model=list[ShortLink])
+def links(
+    search: str | None = None,
+    sort: str = "created_at",
+    current_user: User = Depends(get_current_user),
+):
+    """列出**我的**短链。加了 current_user 依赖 → 不带 token 直接 401。"""
+    return list_links(search=search, sort=sort, owner=current_user.username)
 
 
 @app.post("/shorten", response_model=ShortLink, status_code=status.HTTP_201_CREATED)
-def shorten(req: ShortenRequest):
-    """创建一个短链。
-
-    - 请求体 ShortenRequest：不符合 Pydantic 规则 → 自动 422。
-    - 成功 → 201（REST 约定新建用 201）。
-    - 自定义短码已占用 → 409。
-    """
+def shorten(
+    req: ShortenRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """创建短链，归属人自动记为当前登录用户（不信任请求体里的 owner）。"""
     try:
-        return create_link(req)
+        return create_link(req, owner=current_user.username)
     except CodeTakenError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="自定义短码已存在"
@@ -78,35 +125,46 @@ def shorten(req: ShortenRequest):
 
 
 @app.get("/stats/{code}", response_model=LinkStats)
-def stats(code: str):
-    """查看某条短链的点击统计。短链不存在 → 404。
-
-    用 /stats/{code} 而不是 /{code}/stats：后者和通配路由 /{code} 挨着容易混淆，
-    前者路径更清晰，Swagger 里也好找。
-    """
-    result = get_stats(code)
+def stats(
+    code: str,
+    current_user: User = Depends(get_current_user),
+):
+    """查看**我的**短链的点击统计。不是你的 → 404（不暴露它是否存在）。"""
+    result = get_stats(code, owner=current_user.username)
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="短码不存在")
     return result
 
 
+@app.delete("/{code}", status_code=status.HTTP_204_NO_CONTENT)
+def remove(
+    code: str,
+    current_user: User = Depends(get_current_user),
+):
+    """删除**我的**短链。别人的 → 403；不存在 → 404。"""
+    try:
+        deleted = delete_link(code, owner=current_user.username)
+    except NotOwnerError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="不能删除别人的短链"
+        )
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="短码不存在")
+
+
+# ---------- 跳转（公开，不要求登录） ----------
+
+
 @app.get("/{code}")
 def redirect(code: str, request: Request):
-    """按短码跳转到原网址（307），并记一次访问。不存在 → 404。
+    """按短码跳转（307），并记一次访问。
 
-    用 RedirectResponse 真正让浏览器跳转。固定路由（/links、/stats/{code} 等）
-    定义在它之前 —— FastAPI 按定义顺序匹配，固定路径优先于 {code} 通配。
+    **公开接口**：别人点短链不该要求登录，所以这里没有 Depends(get_current_user)。
+    产品取舍：跳转公开，管理（列表/删除/统计）必须登录且只能操作自己的。
+    路由顺序：/links、/shorten、/stats/{code} 都定义在它之前，固定路径优先于 {code} 通配。
     """
     link = get_link(code)
     if link is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="短码不存在")
-    # 先记访问，再跳转。user_agent 从请求头里取，便于以后分析来源。
     record_visit(code, user_agent=request.headers.get("user-agent"))
     return RedirectResponse(url=link.url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
-
-
-@app.delete("/{code}", status_code=status.HTTP_204_NO_CONTENT)
-def remove(code: str):
-    """删除一条短链。成功 204（无内容）；不存在 → 404。"""
-    if not delete_link(code):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="短码不存在")

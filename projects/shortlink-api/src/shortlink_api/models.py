@@ -15,6 +15,37 @@ from pydantic import AnyHttpUrl, field_validator
 from sqlmodel import SQLModel, Field
 
 
+class User(SQLModel, table=True):
+    """用户表。注意：存的是**哈希后的密码**，不是明文。"""
+
+    __tablename__ = "user"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    # 用户名唯一，登录时按它查
+    username: str = Field(index=True, unique=True)
+    # 存哈希。明文密码永远不落库、不写日志、不出现在响应里。
+    hashed_password: str
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
+
+
+class UserCreate(SQLModel):
+    """注册请求体：用户名 + 明文密码（只在网络上传输一次，落库前就被哈希掉）。"""
+
+    username: str = Field(min_length=3, max_length=32)
+    # bcrypt 只处理前 72 字节，超长会在某些版本直接报错 —— 这里先卡住。
+    password: str = Field(min_length=6, max_length=72)
+
+
+class UserRead(SQLModel):
+    """注册响应体：只回安全字段，绝不含 hashed_password。"""
+
+    id: Optional[int] = None
+    username: str
+    created_at: str
+
+
 class ShortenRequest(SQLModel):
     """POST /shorten 的请求体。只做校验，不是数据库表。"""
 
@@ -43,6 +74,8 @@ class ShortLink(SQLModel, table=True):
     code: str = Field(index=True, unique=True)
     # 原网址，存字符串
     url: str
+    # 归属：这条短链是谁建的（存用户名）。阶段 7 起所有管理操作都按它隔离。
+    owner: str = Field(index=True)
     # 创建时间（UTC，ISO 8601）。default_factory：插入时自动填，不用调用方传。
     created_at: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()

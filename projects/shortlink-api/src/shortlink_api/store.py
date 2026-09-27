@@ -1,27 +1,39 @@
-"""阶段 6 第 1 课：存储层从「内存 dict」换成「SQLite（SQLModel Session）」。
+"""阶段 7：存储层。短链归属到用户，管理操作按 owner 隔离。
 
-关键变化：
-- 数据不再存在进程内存，而在 shortlink.db 文件里；服务重启短链还在。
-- 每个操作开一个 Session（会话 = 一次数据库事务），用完 `with` 自动关、自动提交/回滚。
-- 查「按短码」用 select + where（code 是唯一索引列），不是按主键。
-
-分层价值再次体现：app.py 的调用签名（create_link / get_link / list_links / delete_link）
-完全没变，只改了内部实现。阶段 5 的路由一行都不用动。
+约定：
+- 「跳转」是公开的（别人点短链不该要求登录），所以 get_link / record_visit 不校验 owner。
+- 「管理」（列表 / 删除 / 统计）必须只能操作自己的，越权抛 NotOwnerError → 403。
 """
 import secrets
 import string
 
 from sqlmodel import Session, func, or_, select
 
+from .auth import hash_password, verify_password
 from .database import engine
-from .models import LinkStats, ShortLink, ShortenRequest, Visit
+from .models import (
+    LinkStats,
+    ShortLink,
+    ShortenRequest,
+    User,
+    UserCreate,
+    Visit,
+)
 
 # 短码字符集：大小写字母 + 数字，共 62 个，足够短且 URL 安全。
 ALPHABET = string.ascii_letters + string.digits
 
-# 自定义短码已存在时抛出，由 app.py 转成 409。
+
 class CodeTakenError(Exception):
-    pass
+    """短码已存在 → 409。"""
+
+
+class UserExistsError(Exception):
+    """用户名已被注册 → 409。"""
+
+
+class NotOwnerError(Exception):
+    """想操作别人的短链 → 403。"""
 
 
 def _generate_code(length: int = 6) -> str:
@@ -29,20 +41,58 @@ def _generate_code(length: int = 6) -> str:
     return "".join(secrets.choice(ALPHABET) for _ in range(length))
 
 
+# ---------- 用户 ----------
+
+
+def create_user(req: UserCreate) -> User:
+    """注册：明文密码在这里被哈希，之后**只存哈希**。"""
+    with Session(engine) as session:
+        if _find_user(session, req.username) is not None:
+            raise UserExistsError(req.username)
+        user = User(
+            username=req.username,
+            hashed_password=hash_password(req.password),  # ← 明文到此为止，绝不落库
+        )
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
+
+
+def _find_user(session: Session, username: str) -> User | None:
+    return session.exec(select(User).where(User.username == username)).first()
+
+
+def get_user(username: str) -> User | None:
+    with Session(engine) as session:
+        return _find_user(session, username)
+
+
+def get_user_by_credentials(username: str, password: str) -> User | None:
+    """登录校验：先按用户名找人，再比对密码哈希。任一不对都返回 None（不透露是哪一步错）。"""
+    user = get_user(username)
+    if user is None:
+        return None
+    if not verify_password(password, user.hashed_password):
+        return None
+    return user
+
+
+# ---------- 短链 ----------
+
+
 def _find_by_code(session: Session, code: str) -> ShortLink | None:
-    """按短码查一条（code 是唯一索引列）。返回对象或 None。"""
     return session.exec(select(ShortLink).where(ShortLink.code == code)).first()
 
 
-def create_link(req: ShortenRequest) -> ShortLink:
+def create_link(req: ShortenRequest, owner: str) -> ShortLink:
+    """创建短链，归属人是当前登录用户。"""
     with Session(engine) as session:
         if req.code is not None:
-            # 用户指定短码：已占用 → 报错，不悄悄覆盖。
             if _find_by_code(session, req.code) is not None:
                 raise CodeTakenError(req.code)
             code = req.code
         else:
-            # 随机生成 6 位；极小概率撞车，重抽几次。
             code = _generate_code()
             attempts = 0
             while _find_by_code(session, code) is not None and attempts < 10:
@@ -51,87 +101,73 @@ def create_link(req: ShortenRequest) -> ShortLink:
             if _find_by_code(session, code) is not None:
                 raise RuntimeError("短码生成冲突，请重试")
 
-        # 不传 created_at：靠模型里的 default_factory 在入库时自动填。
-        link = ShortLink(code=code, url=str(req.url))
+        link = ShortLink(code=code, url=str(req.url), owner=owner)
         session.add(link)
         session.commit()
-        session.refresh(link)  # 把数据库生成的主键 id、默认值 created_at 回填到对象
+        session.refresh(link)
         return link
 
 
 def get_link(code: str) -> ShortLink | None:
+    """按短码取一条。**公开**：跳转用，不校验归属。"""
     with Session(engine) as session:
         return _find_by_code(session, code)
 
 
 def list_links(
-    search: str | None = None, sort: str = "created_at"
+    search: str | None = None, sort: str = "created_at", owner: str | None = None
 ) -> list[ShortLink]:
-    """列出短链，支持模糊搜索与排序。
-
-    SQLModel 的查询是**逐步拼装**的：select → .where → .order_by，
-    每个方法都返回新的语句对象，最后 exec 才真正发到数据库。
-    对应 SQL：
-        SELECT * FROM short_link
-        WHERE code LIKE '%x%' OR url LIKE '%x%'
-        ORDER BY created_at
-    """
+    """列出短链。传了 owner 就只看这个人的 —— 这就是「登录隔离」。"""
     with Session(engine) as session:
         statement = select(ShortLink)
-
-        # WHERE：在短码或原网址里模糊匹配（SQL 的 LIKE）
+        if owner is not None:
+            statement = statement.where(ShortLink.owner == owner)
         if search:
             pattern = f"%{search}%"
             statement = statement.where(
                 or_(ShortLink.code.like(pattern), ShortLink.url.like(pattern))
             )
-
-        # ORDER BY：按字段排序
         if sort == "code":
             statement = statement.order_by(ShortLink.code)
         elif sort == "url":
             statement = statement.order_by(ShortLink.url)
-        else:  # 默认按创建时间倒序（最新的在前）
+        else:
             statement = statement.order_by(ShortLink.created_at.desc())
-
         return list(session.exec(statement).all())
 
 
-def delete_link(code: str) -> bool:
+def delete_link(code: str, owner: str) -> bool:
+    """删除自己的短链。
+
+    返回 True = 删成功；False = 短码不存在；抛 NotOwnerError = 存在但不是你的。
+    """
     with Session(engine) as session:
         link = _find_by_code(session, code)
         if link is None:
             return False
+        if link.owner != owner:
+            raise NotOwnerError(code)
         session.delete(link)
         session.commit()
         return True
 
 
 def record_visit(code: str, user_agent: str | None = None) -> None:
-    """记一次访问。跳转前调用一次即可。
-
-    这里单独提交一条，和「查短链」不是一个事务——
-    即使统计写失败，也不该影响用户正常跳转（取舍：统计宁可少一条，不能挡住跳转）。
-    """
+    """记一次访问。跳转是公开的，所以不校验归属；统计写失败也不能挡住跳转。"""
     with Session(engine) as session:
         session.add(Visit(code=code, user_agent=user_agent))
         session.commit()
 
 
-def get_stats(code: str, recent_limit: int = 5) -> LinkStats | None:
-    """统计某条短链的点击情况。短链不存在返回 None（调用方转 404）。"""
+def get_stats(code: str, owner: str, recent_limit: int = 5) -> LinkStats | None:
+    """统计：只能看自己的。不是你的 → 返回 None（对外表现为 404，不暴露「它存在」）。"""
     with Session(engine) as session:
         link = _find_by_code(session, code)
-        if link is None:
+        if link is None or link.owner != owner:
             return None
-
-        # 聚合查询：SELECT count(id) FROM visit WHERE code = ?
-        # 用数据库的 COUNT 而不是把所有记录取出来数 —— 数据量大时差别巨大。
         clicks = session.exec(
             select(func.count(Visit.id)).where(Visit.code == code)
         ).one()
-
-        # 最近几次访问时间
         recent = list(
             session.exec(
                 select(Visit.visited_at)
@@ -140,7 +176,6 @@ def get_stats(code: str, recent_limit: int = 5) -> LinkStats | None:
                 .limit(recent_limit)
             ).all()
         )
-
         return LinkStats(
             code=link.code,
             url=link.url,

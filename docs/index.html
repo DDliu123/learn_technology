@@ -66,7 +66,7 @@
         <ul>
           <li><a href="subscription/">网页版订阅账单管家（原生 JS）</a> —— 阶段 3：添加订阅、统计月度与年度支出，数据存本地浏览器</li>
           <li><a href="subscription-react/">订阅管家 v2（React 版）</a> —— 阶段 4：组件化、受控表单、localStorage 持久化，构建产物直接上线</li>
-          <li>短链接服务 API（FastAPI + SQLModel）—— 阶段 5–6：本地 <code>uv run fastapi dev</code> 启动，<code>/docs</code> 为交互式 Swagger 文档；数据存 SQLite 重启不丢，每次跳转记一次访问统计（API 无法部署到 Pages，需本地或阶段 9 服务器）</li>
+          <li>短链接服务 API（FastAPI + SQLModel + JWT）—— 阶段 5–7：本地 <code>uv run fastapi dev</code> 启动，<code>/docs</code> 为交互式 Swagger 文档；数据存 SQLite 重启不丢，每次跳转记一次访问统计，注册登录后每人只能管理自己的短链（API 无法部署到 Pages，需本地或阶段 9 服务器）</li>
           <li><a href="practice-01.html">第 1 课作业</a> —— 阶段 1：手打的 head 三件套与学习感想</li>
         </ul>
       </section>
@@ -125,6 +125,12 @@
               <td>6</td>
               <td>数据库</td>
               <td>短链 + 访问统计（SQLModel + SQLite）</td>
+              <td>已完成</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>用户与权限</td>
+              <td>短链 + 登录隔离（bcrypt + JWT）</td>
               <td>已完成</td>
             </tr>
           </tbody>

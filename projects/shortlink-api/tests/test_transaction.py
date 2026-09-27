@@ -27,8 +27,8 @@ def main():
     # ① 两条一起写，但中途炸掉（还没 commit）
     try:
         with Session(engine) as session:
-            session.add(ShortLink(code="aaa", url="https://a.com"))
-            session.add(ShortLink(code="bbb", url="https://b.com"))
+            session.add(ShortLink(code="aaa", url="https://a.com", owner="tester"))
+            session.add(ShortLink(code="bbb", url="https://b.com", owner="tester"))
             raise RuntimeError("模拟中途出错")
             session.commit()  # 永远执行不到
     except RuntimeError:
@@ -39,7 +39,7 @@ def main():
 
     # ② 正常提交
     with Session(engine) as session:
-        session.add(ShortLink(code="ccc", url="https://c.com"))
+        session.add(ShortLink(code="ccc", url="https://c.com", owner="tester"))
         session.commit()
     assert "ccc" in codes()
     print("② 正常 commit → 落盘 ✅")
@@ -47,9 +47,9 @@ def main():
     # ③ 先提交再出错：已提交的部分不会回滚（理解 commit 的分界线）
     try:
         with Session(engine) as session:
-            session.add(ShortLink(code="ddd", url="https://d.com"))
+            session.add(ShortLink(code="ddd", url="https://d.com", owner="tester"))
             session.commit()  # 这一条已经落盘
-            session.add(ShortLink(code="eee", url="https://e.com"))
+            session.add(ShortLink(code="eee", url="https://e.com", owner="tester"))
             raise RuntimeError("提交后又炸了")
     except RuntimeError:
         pass
