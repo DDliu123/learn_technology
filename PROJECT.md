@@ -6,7 +6,7 @@
 ## 项目
 
 一名 AI 产品经理的软件开发学习仓库，产出可运行产品 + 公开笔记。
-当前阶段：**阶段 4（React）进行中**。
+当前阶段：**阶段 5（FastAPI）已完成**，即将进入阶段 6（数据库）。
 
 ## 技术栈
 
@@ -29,7 +29,8 @@ docs/                       GitHub Pages 发布目录，每次 push 后自动更
 └── subscription-react/     阶段 4：React 版构建产物（由 projects/subscription-react 的 npm run build 生成）
 projects/                   不需要发布页面的项目源码
 ├── subscription-cli/       阶段 2：Python CLI 版订阅管家（uv 管理）
-└── subscription-react/     阶段 4：React 版，需 build，产物为 dist/（不入库）
+├── subscription-react/     阶段 4：React 版，需 build，产物为 dist/（不入库）
+└── shortlink-api/          阶段 5：FastAPI 短链 API（uv 管理，本地 `uv run fastapi dev`，Swagger 在 /docs）
 articles/                   公开笔记稿（md + 配图，用户自维护）
 README.md                   对外说明：在做什么、路线、进度
 PROJECT.md          本文件：给 AI 的项目上下文
@@ -41,6 +42,8 @@ scratch/            临时练习，不入 git
 站点地址：<https://ddliu123.github.io/learn_technology/>
 Demo —— 网页版订阅管家（原生 JS）：<https://ddliu123.github.io/learn_technology/subscription/>
 Demo —— 订阅管家 v2（React）：<https://ddliu123.github.io/learn_technology/subscription-react/>
+短链 API（阶段 5，FastAPI）：本地运行 `uv run fastapi dev`，交互文档 http://127.0.0.1:8000/docs 。
+注意：GitHub Pages 只托管静态文件，API 服务无法部署到 Pages，需本地或阶段 9 的服务器部署。
 
 新网页要上线：Pages 一个仓库只给一个站点，来源只能是根目录或 /docs，所以新页面一律放 `docs/<子目录>/`，
 禁止「源码一份 + docs 里再复制一份」——两边迟早不同步。

@@ -24,3 +24,7 @@ Thumbs.db
 # 本地工具数据与练习暂存区
 .workbuddy/
 scratch/
+
+# 用户自建公开笔记（用户明确要求不入库）与运行时数据
+articles/
+data/
