@@ -50,6 +50,7 @@ uv init <项目名> --app --vcs none   # 建项目；外层已有仓库时加 --
 uv run <命令>                        # 跑代码（自动管虚拟环境）
 uv add/remove <包名>                 # 增删依赖
 node <脚本>.js                       # 跑 JS：也可套一层假 DOM，测试浏览器里的纯计算逻辑
+node <脚本>.mjs                      # ESM 脚本：React 组件可用 vite ssrLoadModule + renderToStaticMarkup 无浏览器渲染测试
 npm install / npm run dev / build    # 前端项目；npm 缓存目录已改到 ~/.npm-cache（见下）
 git add -A && git commit -m "类型: 说明"   # 每完成一个可运行功能就提交
 ```

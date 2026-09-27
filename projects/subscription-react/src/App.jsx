@@ -1,23 +1,40 @@
+import { useState } from "react";
 import SiteHeader from "./components/SiteHeader.jsx";
 import StatCard from "./components/StatCard.jsx";
 import BillTable from "./components/BillTable.jsx";
-import { SUBSCRIPTIONS } from "./data.js";
+import BillForm from "./components/BillForm.jsx";
+import { SUBSCRIPTIONS, createId } from "./data.js";
 import {
   annualCost,
   formatMoney,
   monthlyCost,
   mostExpensive,
   sortByNextBilling,
+  sortByPrice,
 } from "./money.js";
 
-/**
- * 第 1 课：只做静态渲染 —— 数据写死、没有交互。
- * React 的核心公式：UI = f(state)
- * 你只描述「数据是这样时，界面长这样」，不用再手写 createElement / appendChild / 重画。
- */
 export default function App() {
-  const subs = sortByNextBilling(SUBSCRIPTIONS);
-  const top = mostExpensive(subs);
+  // useState 返回 [当前值, 设置函数]。调用设置函数 → React 自动重新渲染
+  const [subs, setSubs] = useState(() => structuredClone(SUBSCRIPTIONS));
+  const [sortMode, setSortMode] = useState("date");
+
+  // --- 修改数据：一律「基于旧值返回新数组」，绝不 push / splice 直接改 ---
+  function handleAdd(data) {
+    setSubs((prev) => [...prev, { id: createId(), ...data }]);
+  }
+
+  function handleRemove(id) {
+    setSubs((prev) => prev.filter((s) => s.id !== id));
+  }
+
+  function handleReset() {
+    if (!confirm("这会覆盖当前所有订阅，确定恢复示例数据？")) return;
+    setSubs(structuredClone(SUBSCRIPTIONS));
+  }
+
+  // --- 派生数据：由 state 算出来，不要再存一份 state ---
+  const visible = sortMode === "price" ? sortByPrice(subs) : sortByNextBilling(subs);
+  const top = subs.length > 0 ? mostExpensive(subs) : null;
 
   return (
     <>
@@ -28,18 +45,36 @@ export default function App() {
           <StatCard label="订阅数量" value={String(subs.length)} />
           <StatCard label="月度支出" value={formatMoney(monthlyCost(subs))} accent />
           <StatCard label="年度支出" value={formatMoney(annualCost(subs))} />
-          <StatCard label="最贵的一项" value={`${top.name} · ${formatMoney(top.price)}`} />
+          <StatCard
+            label="最贵的一项"
+            value={top ? `${top.name} · ${formatMoney(top.price)}` : "—"}
+          />
         </section>
 
+        <BillForm onAdd={handleAdd} />
+
         <section className="card">
-          <h2>我的订阅</h2>
-          {/* 数据以 props 的形式传给子组件 */}
-          <BillTable subs={subs} />
+          <div className="card-head">
+            <h2>我的订阅</h2>
+            <div className="actions">
+              <button type="button" onClick={() => setSortMode("date")}>
+                按下次扣费排序
+              </button>
+              <button type="button" onClick={() => setSortMode("price")}>
+                按月费排序
+              </button>
+              <button type="button" onClick={handleReset}>
+                恢复示例数据
+              </button>
+            </div>
+          </div>
+
+          <BillTable subs={visible} onRemove={handleRemove} />
         </section>
       </main>
 
       <footer className="site-footer">
-        <p>阶段 4 · React &nbsp;·&nbsp; 数据当前写死在 data.js，第 2、3 课逐步改为可交互与可持久化</p>
+        <p>阶段 4 · React &nbsp;·&nbsp; 数据存在内存里，刷新会重置 —— 第 3 课用 useEffect 落盘</p>
       </footer>
     </>
   );

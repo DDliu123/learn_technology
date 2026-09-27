@@ -89,7 +89,7 @@ body {
   border-radius: var(--radius);
 }
 
-.card h2 {
+.card > h2 {
   margin: 0 0 16px;
   font-size: 1.15rem;
 }
@@ -140,7 +140,99 @@ body {
   font-size: 0.9rem;
 }
 
-/* ===== 8. 响应式 ===== */
+/* ===== 8. 按钮 ===== */
+button {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.link-danger {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  color: var(--color-danger);
+  border-color: transparent;
+  background: transparent;
+}
+
+.link-danger:hover {
+  color: #ffffff;
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+/* ===== 9. 表单：Grid 自动降列 ===== */
+.bill-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.bill-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.bill-form input {
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.bill-form input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -1px;
+  border-color: var(--color-accent);
+}
+
+.tip {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: var(--color-danger);
+  background: #ffebe9;
+  border: 1px solid #ffcecb;
+  border-radius: 6px;
+}
+
+/* ===== 10. 响应式 ===== */
 @media (max-width: 640px) {
   .card {
     padding: 16px;
