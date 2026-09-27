@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* ===== 1. 变量：改一处全站生效 ===== */
 :root {
   --color-text: #1f2328;
@@ -50,14 +52,9 @@ body {
   color: var(--color-muted);
 }
 
-/* ===== 4. 概览卡片：Grid 自动适配列数 ===== */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space);
-  margin: 24px 0;
-}
-
+/* ===== 4. 概览卡片 ===== */
+/* .stats 的 Grid 布局已迁移到 Tailwind 工具类（见 App.jsx：grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4），
+   这里只保留单个卡片的视觉样式 */
 .stat {
   padding: 16px 20px;
   background: var(--color-surface);

@@ -1,16 +1,31 @@
-# React + Vite
+# subscription-react
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+阶段 4：React 版订阅账单管家。组件化、受控表单、localStorage 持久化（数据刷新不丢）。
 
-Currently, two official plugins are available:
+## 命令
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install              # 装依赖（缓存目录已改到 ~/.npm-cache）
+npm run dev              # 开发服务器 http://localhost:5173
+npm run build            # 构建到 ../../docs/subscription-react（Pages 子站，自动上线）
+npm run lint             # oxlint，0 错误
+```
 
-## React Compiler
+## 结构
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| 文件 | 作用 |
+|---|---|
+| `src/money.js` | 纯计算，与阶段 2 `bill.py`、阶段 3 `app.js` 同构 |
+| `src/data.js` | 种子数据 + `createId` |
+| `src/storage.js` | localStorage 读写（损坏数据降级到种子） |
+| `src/App.jsx` | 根组件：`useState` 管数据、`useEffect` 落盘 |
+| `src/components/` | `SiteHeader` / `StatCard` / `BillTable` / `BillForm` |
 
-## Expanding the Oxlint configuration
+## 部署说明
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Pages 一个仓库只给一个站点源（根目录或 `/docs`），所以 React 应用只能做子目录。
+`vite.config.js` 的 `base` 设为 `/learn_technology/subscription-react/`，`build.outDir` 直接指向 `../../docs/subscription-react` —— 单一副本，push 即上线。
+
+## 技术栈
+
+React 19 + Vite 8 + Tailwind v4 + oxlint。

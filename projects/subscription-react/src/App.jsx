@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SiteHeader from "./components/SiteHeader.jsx";
 import StatCard from "./components/StatCard.jsx";
 import BillTable from "./components/BillTable.jsx";
 import BillForm from "./components/BillForm.jsx";
 import { SUBSCRIPTIONS, createId } from "./data.js";
+import { loadSubscriptions, saveSubscriptions } from "./storage.js";
 import {
   annualCost,
   formatMoney,
@@ -14,9 +15,15 @@ import {
 } from "./money.js";
 
 export default function App() {
-  // useState 返回 [当前值, 设置函数]。调用设置函数 → React 自动重新渲染
-  const [subs, setSubs] = useState(() => structuredClone(SUBSCRIPTIONS));
+  // 惰性初值：首次渲染时优先读 localStorage，没有才用种子数据
+  const [subs, setSubs] = useState(() => loadSubscriptions() ?? structuredClone(SUBSCRIPTIONS));
   const [sortMode, setSortMode] = useState("date");
+
+  // useEffect：subs 每次变化都把最新值写回 localStorage
+  // 第二个参数是「依赖数组」—— 只有里面的变量变了才重新执行
+  useEffect(() => {
+    saveSubscriptions(subs);
+  }, [subs]);
 
   // --- 修改数据：一律「基于旧值返回新数组」，绝不 push / splice 直接改 ---
   function handleAdd(data) {
@@ -41,7 +48,7 @@ export default function App() {
       <SiteHeader />
 
       <main className="container">
-        <section className="stats">
+        <section className="stats grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="订阅数量" value={String(subs.length)} />
           <StatCard label="月度支出" value={formatMoney(monthlyCost(subs))} accent />
           <StatCard label="年度支出" value={formatMoney(annualCost(subs))} />
@@ -74,7 +81,7 @@ export default function App() {
       </main>
 
       <footer className="site-footer">
-        <p>阶段 4 · React &nbsp;·&nbsp; 数据存在内存里，刷新会重置 —— 第 3 课用 useEffect 落盘</p>
+        <p>阶段 4 · React &nbsp;·&nbsp; 数据已写入 localStorage，刷新不丢；与阶段 3 网页版共用同一套数据结构</p>
       </footer>
     </>
   );

@@ -26,6 +26,7 @@
 docs/                       GitHub Pages 发布目录，每次 push 后自动更新
 ├── index.html              教程站首页（含 Demo 区块）
 └── subscription/           阶段 3：网页版订阅管家（既是源码也是线上页面）
+└── subscription-react/     阶段 4：React 版构建产物（由 projects/subscription-react 的 npm run build 生成）
 projects/                   不需要发布页面的项目源码
 ├── subscription-cli/       阶段 2：Python CLI 版订阅管家（uv 管理）
 └── subscription-react/     阶段 4：React 版，需 build，产物为 dist/（不入库）
@@ -38,7 +39,8 @@ scratch/            临时练习，不入 git
 ```
 
 站点地址：<https://ddliu123.github.io/learn_technology/>
-Demo —— 网页版订阅管家：<https://ddliu123.github.io/learn_technology/subscription/>
+Demo —— 网页版订阅管家（原生 JS）：<https://ddliu123.github.io/learn_technology/subscription/>
+Demo —— 订阅管家 v2（React）：<https://ddliu123.github.io/learn_technology/subscription-react/>
 
 新网页要上线：Pages 一个仓库只给一个站点，来源只能是根目录或 /docs，所以新页面一律放 `docs/<子目录>/`，
 禁止「源码一份 + docs 里再复制一份」——两边迟早不同步。
