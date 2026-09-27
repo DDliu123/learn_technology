@@ -6,7 +6,7 @@
 ## 项目
 
 一名 AI 产品经理的软件开发学习仓库，产出可运行产品 + 公开笔记。
-当前阶段：**阶段 5（FastAPI）已完成**，即将进入阶段 6（数据库）。
+当前阶段：**阶段 6（数据库）已完成**，即将进入阶段 7（用户与权限）。
 
 ## 技术栈
 
@@ -16,7 +16,7 @@
 | 后端     | **Python 3.13 + FastAPI** | 类型提示即校验                |
 | 包管理    | **uv**                    | 已取代 pip，禁止手写 venv      |
 | 运行时     | **Node.js**（可选）         | 跑前端构建工具；纯静态页不一定需要 |
-| 数据库    | PostgreSQL（Supabase/Neon）+ SQLModel | 阶段 6 引入        |
+| 数据库    | **SQLModel**：开发用 SQLite（落盘文件），部署换 PostgreSQL（Supabase/Neon） | 阶段 6 已落地 SQLite |
 | 部署     | 前端 Vercel；后端 Render/Railway | 阶段 9 引入              |
 | 移动端    | 微信小程序（调 HTTP 接口）          | 阶段 10 引入               |
 
@@ -30,7 +30,9 @@ docs/                       GitHub Pages 发布目录，每次 push 后自动更
 projects/                   不需要发布页面的项目源码
 ├── subscription-cli/       阶段 2：Python CLI 版订阅管家（uv 管理）
 ├── subscription-react/     阶段 4：React 版，需 build，产物为 dist/（不入库）
-└── shortlink-api/          阶段 5：FastAPI 短链 API（uv 管理，本地 `uv run fastapi dev`，Swagger 在 /docs）
+└── shortlink-api/          阶段 5–6：FastAPI 短链 API（uv 管理，本地 `uv run fastapi dev`，Swagger 在 /docs）
+    ├── database.py         阶段 6：engine + create_db_and_tables（SQLite 文件，*.db 不入库）
+    └── tests/              无浏览器测试（test_api.py 跑接口；test_transaction.py 证明事务回滚）
 articles/                   公开笔记稿（md + 配图，用户自维护）
 README.md                   对外说明：在做什么、路线、进度
 PROJECT.md          本文件：给 AI 的项目上下文
@@ -42,7 +44,8 @@ scratch/            临时练习，不入 git
 站点地址：<https://ddliu123.github.io/learn_technology/>
 Demo —— 网页版订阅管家（原生 JS）：<https://ddliu123.github.io/learn_technology/subscription/>
 Demo —— 订阅管家 v2（React）：<https://ddliu123.github.io/learn_technology/subscription-react/>
-短链 API（阶段 5，FastAPI）：本地运行 `uv run fastapi dev`，交互文档 http://127.0.0.1:8000/docs 。
+短链 API（阶段 5–6，FastAPI + SQLite）：本地运行 `uv run fastapi dev`，交互文档 http://127.0.0.1:8000/docs 。
+数据落在 `projects/shortlink-api/shortlink.db`（*.db 已 gitignore，不入库）。
 注意：GitHub Pages 只托管静态文件，API 服务无法部署到 Pages，需本地或阶段 9 的服务器部署。
 
 新网页要上线：Pages 一个仓库只给一个站点，来源只能是根目录或 /docs，所以新页面一律放 `docs/<子目录>/`，

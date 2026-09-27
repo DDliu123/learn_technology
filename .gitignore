@@ -28,3 +28,8 @@ scratch/
 # 用户自建公开笔记（用户明确要求不入库）与运行时数据
 articles/
 data/
+
+# 运行时数据库（SQLite 文件，每次本地运行生成，不属于源码）
+*.db
+*.sqlite
+*.sqlite3
