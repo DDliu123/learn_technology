@@ -6,13 +6,13 @@
 ## 项目
 
 一名 AI 产品经理的软件开发学习仓库，产出可运行产品 + 公开笔记。
-当前阶段：**阶段 3 已完成**（网页版订阅管家已上线）。
+当前阶段：**阶段 4（React）进行中**。
 
 ## 技术栈
 
 | 层      | 选型                        | 备注                     |
 | ------ | ------------------------- | ---------------------- |
-| 前端     | HTML/CSS → JavaScript → React + Tailwind | 浏览器只跑 JS，Python 不可替代前端 |
+| 前端     | HTML/CSS → JavaScript → **React 19 + Vite** → Tailwind | 浏览器只跑 JS，Python 不可替代前端 |
 | 后端     | **Python 3.13 + FastAPI** | 类型提示即校验                |
 | 包管理    | **uv**                    | 已取代 pip，禁止手写 venv      |
 | 运行时     | **Node.js**（可选）         | 跑前端构建工具；纯静态页不一定需要 |
@@ -27,7 +27,9 @@ docs/                       GitHub Pages 发布目录，每次 push 后自动更
 ├── index.html              教程站首页（含 Demo 区块）
 └── subscription/           阶段 3：网页版订阅管家（既是源码也是线上页面）
 projects/                   不需要发布页面的项目源码
-└── subscription-cli/       阶段 2：Python CLI 版订阅管家（uv 管理）
+├── subscription-cli/       阶段 2：Python CLI 版订阅管家（uv 管理）
+└── subscription-react/     阶段 4：React 版，需 build，产物为 dist/（不入库）
+articles/                   公开笔记稿（md + 配图，用户自维护）
 README.md                   对外说明：在做什么、路线、进度
 PROJECT.md          本文件：给 AI 的项目上下文
 学习路线-总览.md        阶段地图与 AI 协作原则
@@ -48,10 +50,16 @@ uv init <项目名> --app --vcs none   # 建项目；外层已有仓库时加 --
 uv run <命令>                        # 跑代码（自动管虚拟环境）
 uv add/remove <包名>                 # 增删依赖
 node <脚本>.js                       # 跑 JS：也可套一层假 DOM，测试浏览器里的纯计算逻辑
+npm install / npm run dev / build    # 前端项目；npm 缓存目录已改到 ~/.npm-cache（见下）
 git add -A && git commit -m "类型: 说明"   # 每完成一个可运行功能就提交
 ```
 
 提交类型只用：`init` `feat` `fix` `docs` `refactor` `chore`。
+
+## 本机环境备注
+
+- Node 装在 `C:\SoftWare\nodejs`，默认缓存目录无写权限 → 已建议 `npm config set cache "C:/Users/wise/.npm-cache"`；未设置时用环境变量 `npm_config_cache` 临时绕过。
+- 一些网络请求（VS Code 插件市场等）会被本机代理的 TLS 中间证书拦截，报 `Cert does not contain a DNS name`，必要时需手动安装。
 
 ## 给 AI 的规则
 

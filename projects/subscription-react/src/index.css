@@ -1,0 +1,155 @@
+/* ===== 1. 变量：改一处全站生效 ===== */
+:root {
+  --color-text: #1f2328;
+  --color-muted: #656d76;
+  --color-bg: #ffffff;
+  --color-surface: #f6f8fa;
+  --color-border: #d0d7de;
+  --color-accent: #0969da;
+  --color-danger: #cf222e;
+  --radius: 8px;
+  --space: 16px;
+  --max-width: 860px;
+}
+
+/* ===== 2. 全局重置 ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Microsoft YaHei", sans-serif;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ===== 3. 页头 ===== */
+.site-header {
+  padding: 40px 0 24px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+.site-header p {
+  margin: 8px 0 0;
+  color: var(--color-muted);
+}
+
+/* ===== 4. 概览卡片：Grid 自动适配列数 ===== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space);
+  margin: 24px 0;
+}
+
+.stat {
+  padding: 16px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.stat-value {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.stat-value.accent {
+  color: var(--color-accent);
+}
+
+/* ===== 5. 卡片容器 ===== */
+.card {
+  margin: 24px 0;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.card h2 {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+}
+
+/* ===== 6. 表格 ===== */
+.bill-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: var(--color-bg);
+}
+
+.bill-table th,
+.bill-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.bill-table th {
+  background: #eaeef2;
+  font-weight: 600;
+}
+
+.bill-table th.num,
+.bill-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.bill-table tbody tr:hover {
+  background: var(--color-surface);
+}
+
+.empty {
+  margin: 16px 0 0;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* ===== 7. 页脚 ===== */
+.site-footer {
+  margin-top: 48px;
+  padding: 24px 0;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+/* ===== 8. 响应式 ===== */
+@media (max-width: 640px) {
+  .card {
+    padding: 16px;
+  }
+
+  .bill-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+}
